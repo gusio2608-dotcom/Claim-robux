@@ -1,0 +1,284 @@
+import React, { useState, useEffect } from 'react';
+import { Coins, MousePointer, Zap, Trophy, AlertTriangle, Info, User, Lock } from 'lucide-react';
+
+const App = () => {
+  const [balance, setBalance] = useState(0);
+  const [clickValue, setClickValue] = useState(1);
+  const [autoClickers, setAutoClickers] = useState(0);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [username, setUsername] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [withdrawStatus, setWithdrawStatus] = useState('idle'); // idle, processing, failed
+
+  // Sistem Auto Clicker
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (autoClickers > 0) {
+        setBalance((prev) => prev + autoClickers);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [autoClickers]);
+
+  const handleClick = () => {
+    setBalance(balance + clickValue);
+  };
+
+  const items = [
+    { id: 1, name: 'Mouse Gaming Murah', cost: 50, value: 1, type: 'click', icon: MousePointer, desc: '+1 per klik' },
+    { id: 2, name: 'Bot Mining Dasar', cost: 200, value: 5, type: 'auto', icon: Zap, desc: '+5 per detik' },
+    { id: 3, name: 'Server Super Cepat', cost: 1000, value: 15, type: 'click', icon: Trophy, desc: '+15 per klik' },
+    { id: 4, name: 'Hacker AI (Simulasi)', cost: 5000, value: 100, type: 'auto', icon: Lock, desc: '+100 per detik' },
+  ];
+
+  const buyItem = (item) => {
+    if (balance >= item.cost) {
+      setBalance(balance - item.cost);
+      if (item.type === 'click') {
+        setClickValue(clickValue + item.value);
+      } else {
+        setAutoClickers(autoClickers + item.value);
+      }
+    }
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (username.trim().length > 0) {
+      setIsLoggedIn(true);
+    }
+  };
+
+  const handleWithdraw = () => {
+    setWithdrawStatus('processing');
+    setTimeout(() => {
+      setWithdrawStatus('failed');
+    }, 3000);
+  };
+
+  // Halaman Login Palsu (Simulator)
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans text-white">
+        <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-700">
+          <div className="flex justify-center mb-6">
+            <div className="bg-emerald-500 p-4 rounded-full shadow-lg shadow-emerald-500/20">
+              <Coins size={48} className="text-white" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-center mb-2">Robux Simulator</h1>
+          <p className="text-slate-400 text-center mb-8">Masukkan username untuk memulai simulasi tycoon.</p>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-300">Username (Bebas)</label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 text-slate-500" size={20} />
+                <input 
+                  type="text" 
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:border-emerald-500 transition text-white"
+                  placeholder="Player123"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <button 
+              type="submit"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition shadow-lg"
+            >
+              Mulai Main
+            </button>
+          </form>
+          
+          <div className="mt-6 flex items-start gap-2 bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
+            <AlertTriangle className="text-yellow-500 flex-shrink-0" size={20} />
+            <p className="text-xs text-yellow-500/90">
+              Ini hanyalah permainan simulasi. Tidak ada Robux asli yang dihasilkan. Jangan pernah memberikan password asli Anda di situs web acak.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Halaman Utama Game
+  return (
+    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
+      {/* Navbar */}
+      <nav className="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-md">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="bg-emerald-500 p-1.5 rounded-lg">
+              <Coins size={20} />
+            </div>
+            <span className="font-bold text-xl tracking-tight">R$ Simulator</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-slate-400 hidden sm:block">
+              Player: <span className="text-white font-semibold">{username}</span>
+            </div>
+            <div className="bg-slate-900 px-4 py-1.5 rounded-full border border-slate-700 flex items-center gap-2">
+              <Coins size={16} className="text-emerald-400" />
+              <span className="font-mono font-bold text-emerald-400">
+                {balance.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="flex-1 max-w-6xl mx-auto w-full p-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Kolom Kiri: Area Klik */}
+        <div className="md:col-span-1 flex flex-col gap-6">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl flex flex-col items-center justify-center flex-1 min-h-[300px] relative overflow-hidden group">
+            <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition duration-500"></div>
+            
+            <div className="text-center mb-8 relative z-10">
+              <h2 className="text-slate-400 text-sm uppercase tracking-wider font-semibold mb-1">Balance Saat Ini</h2>
+              <div className="text-5xl font-extrabold text-white flex items-center justify-center gap-2">
+                <Coins size={36} className="text-emerald-500" />
+                {balance.toLocaleString()}
+              </div>
+              <p className="text-slate-500 text-xs mt-2">
+                {autoClickers > 0 ? `+${autoClickers} per detik` : 'Klik tombol di bawah!'}
+              </p>
+            </div>
+
+            <button
+              onClick={handleClick}
+              className="relative z-10 bg-gradient-to-b from-emerald-500 to-emerald-700 active:from-emerald-700 active:to-emerald-800 hover:scale-105 active:scale-95 transition-all duration-100 rounded-full p-8 shadow-2xl shadow-emerald-500/30 border-4 border-emerald-400/30"
+            >
+              <MousePointer size={64} className="text-white fill-current" />
+            </button>
+            
+            <p className="mt-6 text-slate-500 text-sm animate-pulse">
+              Klik untuk generate! (+{clickValue})
+            </p>
+          </div>
+
+          <button 
+            onClick={() => setShowWithdrawModal(true)}
+            className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 group"
+          >
+            <Zap size={20} className="text-yellow-400 group-hover:scale-110 transition" />
+            Claim / Withdraw
+          </button>
+        </div>
+
+        {/* Kolom Kanan: Shop */}
+        <div className="md:col-span-2">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl h-full">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Trophy className="text-yellow-500" />
+              Upgrade Shop
+            </h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => buyItem(item)}
+                  disabled={balance < item.cost}
+                  className={`
+                    relative overflow-hidden p-4 rounded-xl border text-left transition-all duration-200
+                    ${balance >= item.cost 
+                      ? 'bg-slate-700 border-slate-600 hover:border-emerald-500 hover:bg-slate-600 cursor-pointer' 
+                      : 'bg-slate-800/50 border-slate-700 opacity-60 cursor-not-allowed'}
+                  `}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className={`p-2 rounded-lg ${balance >= item.cost ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-500'}`}>
+                      <item.icon size={24} />
+                    </div>
+                    <span className={`font-mono font-bold ${balance >= item.cost ? 'text-emerald-400' : 'text-slate-500'}`}>
+                      R$ {item.cost.toLocaleString()}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-white">{item.name}</h3>
+                  <p className="text-sm text-slate-400">{item.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Disclaimer */}
+      <footer className="p-6 text-center text-slate-600 text-xs">
+        <p className="flex items-center justify-center gap-2 mb-2">
+          <Info size={14} />
+          Disclaimer: Aplikasi ini hanyalah <strong>Simulator / Game</strong>.
+        </p>
+        <p>
+          Robux yang dikumpulkan di sini adalah fiktif dan <strong>TIDAK BISA</strong> ditransfer ke akun Roblox asli Anda.
+          Hati-hati terhadap situs penipuan yang meminta password Anda.
+        </p>
+      </footer>
+
+      {/* Modal Withdraw Simulator */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-slate-800 rounded-2xl p-8 max-w-sm w-full border border-slate-700 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <h3 className="text-2xl font-bold mb-4 text-center">Withdraw Robux</h3>
+            
+            {withdrawStatus === 'idle' && (
+              <div className="space-y-4">
+                <p className="text-slate-300 text-center">
+                  Anda akan menarik <span className="text-emerald-400 font-bold">{balance.toLocaleString()} R$</span> ke akun <span className="text-white font-semibold">{username}</span>?
+                </p>
+                <div className="flex gap-3 mt-6">
+                  <button 
+                    onClick={() => setShowWithdrawModal(false)}
+                    className="flex-1 bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition"
+                  >
+                    Batal
+                  </button>
+                  <button 
+                    onClick={handleWithdraw}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-semibold transition shadow-lg shadow-emerald-500/20"
+                  >
+                    Konfirmasi
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {withdrawStatus === 'processing' && (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-emerald-400 font-medium">Menghubungkan ke Server...</p>
+                <p className="text-xs text-slate-500 mt-2">Memverifikasi Hash...</p>
+              </div>
+            )}
+
+            {withdrawStatus === 'failed' && (
+              <div className="text-center">
+                <div className="mx-auto w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                  <AlertTriangle size={32} className="text-red-500" />
+                </div>
+                <h4 className="text-xl font-bold text-white mb-2">Simulasi Selesai!</h4>
+                <p className="text-slate-300 text-sm mb-6">
+                  Seperti yang tertulis di disclaimer, ini hanyalah game simulasi untuk hiburan. Robux asli hanya bisa didapatkan di situs resmi Roblox.
+                </p>
+                <button 
+                  onClick={() => {
+                    setShowWithdrawModal(false);
+                    setWithdrawStatus('idle');
+                  }}
+                  className="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-semibold transition"
+                >
+                  Kembali Main
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default App;
